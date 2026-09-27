@@ -1,0 +1,5 @@
+# Outils locaux
+.claude/
+*.log
+Thumbs.db
+desktop.ini

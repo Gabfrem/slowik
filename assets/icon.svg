@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <circle cx="32" cy="32" r="31" fill="#1D1A2C"/>
+  <g transform="translate(32 32)">
+    <g fill="#E0303E">
+      <path id="p" d="M0 0C6-5 7-15 0-24C-7-15-6-5 0 0Z"/>
+      <use href="#p" transform="rotate(45)"/>
+      <use href="#p" transform="rotate(90)"/>
+      <use href="#p" transform="rotate(135)"/>
+      <use href="#p" transform="rotate(180)"/>
+      <use href="#p" transform="rotate(225)"/>
+      <use href="#p" transform="rotate(270)"/>
+      <use href="#p" transform="rotate(315)"/>
+    </g>
+    <g fill="#F4B928" transform="rotate(22.5) scale(.55)">
+      <use href="#p"/>
+      <use href="#p" transform="rotate(90)"/>
+      <use href="#p" transform="rotate(180)"/>
+      <use href="#p" transform="rotate(270)"/>
+    </g>
+    <circle r="6.5" fill="#1F9463"/>
+    <circle r="2.6" fill="#FFFAF1"/>
+  </g>
+</svg>

@@ -1,0 +1,169 @@
+/* Słowik — mouvement : images clés, cascades, transitions de vues, mascotte. */
+
+@keyframes rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes rise-blur { from { opacity: 0; transform: translateY(18px) scale(.985); filter: blur(8px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes drop { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(.55) rotate(-6deg); }
+  60% { opacity: 1; transform: scale(1.08) rotate(2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+@keyframes zoom-in { from { opacity: 0; transform: scale(.9); } to { opacity: 1; transform: none; } }
+@keyframes slide-l { from { opacity: 0; transform: translateX(46px); } to { opacity: 1; transform: none; } }
+@keyframes slide-out-l { to { opacity: 0; transform: translateX(-46px); } }
+@keyframes letter-up {
+  0% { opacity: 0; transform: translateY(.7em) rotate(8deg) scale(.8); }
+  70% { opacity: 1; transform: translateY(-.06em) rotate(-2deg) scale(1.04); }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+@keyframes float-r { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-12px) rotate(6deg); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes spin-rev { to { transform: rotate(-360deg); } }
+@keyframes pulse-ring { 0% { transform: scale(1); opacity: .55; } 100% { transform: scale(1.9); opacity: 0; } }
+@keyframes breathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+@keyframes shimmer { from { transform: translateX(-120%) skewX(-20deg); } to { transform: translateX(260%) skewX(-20deg); } }
+@keyframes wiggle { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-9deg); } 75% { transform: rotate(9deg); } }
+@keyframes flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  30% { transform: scale(1.08, .94) rotate(3deg); }
+  60% { transform: scale(.95, 1.07) rotate(-3deg); }
+}
+@keyframes bounce-y { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-14px); } 60% { transform: translateY(-4px); } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes wave-bar { 0%, 100% { transform: scaleY(.35); } 50% { transform: scaleY(1); } }
+@keyframes ripple { from { transform: scale(0); opacity: .45; } to { transform: scale(1); opacity: 0; } }
+@keyframes float-up { 0% { opacity: 0; transform: translate(-50%, 0) scale(.6); } 20% { opacity: 1; transform: translate(-50%, -18px) scale(1.12); } 100% { opacity: 0; transform: translate(-50%, -90px) scale(1); } }
+@keyframes stamp { 0% { opacity: 0; transform: scale(2.4) rotate(-14deg); } 55% { opacity: 1; transform: scale(.92) rotate(3deg); } 100% { opacity: 1; transform: scale(1) rotate(-4deg); } }
+@keyframes petal-in { from { transform: var(--rot, rotate(0)) scale(0); opacity: 0; } to { transform: var(--rot, rotate(0)) scale(1); opacity: 1; } }
+@keyframes blob-a { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(8vw, 5vh) scale(1.12); } 66% { transform: translate(-4vw, 9vh) scale(.94); } }
+@keyframes blob-b { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-9vw, -6vh) scale(1.18); } }
+@keyframes blob-c { 0%, 100% { transform: translate(0, 0) scale(1.05); } 50% { transform: translate(6vw, -8vh) scale(.9); } }
+@keyframes orn-drift { 0%, 100% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(10px, -16px) rotate(12deg); } }
+@keyframes shake-x { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 40% { transform: translateX(7px); } 60% { transform: translateX(-5px); } 80% { transform: translateX(3px); } }
+@keyframes glow { 0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--c, var(--red)) 45%, transparent); } 50% { box-shadow: 0 0 0 10px color-mix(in srgb, var(--c, var(--red)) 0%, transparent); } }
+
+/* Cascade d'apparition : enfants avec --i */
+.stagger > * { animation: rise .7s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 60ms + var(--d0, 0ms)); }
+.stagger-pop > * { animation: pop-in .6s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms + var(--d0, 0ms)); }
+.a-rise { animation: rise .7s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+.a-rise-blur { animation: rise-blur .8s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+.a-pop { animation: pop-in .65s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+.a-zoom { animation: zoom-in .5s var(--ease-out) both; animation-delay: var(--d, 0ms); }
+.a-float { animation: float 4.5s ease-in-out infinite; }
+.a-spin-slow { animation: spin 60s linear infinite; }
+
+/* Apparition au défilement */
+.rv { opacity: 0; transform: translateY(26px); transition: opacity .8s var(--ease-out), transform .8s var(--ease-out); transition-delay: calc(var(--i, 0) * 55ms); }
+.rv.in { opacity: 1; transform: none; }
+
+/* Lettres animées */
+.ltr { display: inline-block; animation: letter-up .7s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms + var(--d0, 0ms)); }
+.ltr-sp { display: inline-block; width: .28em; }
+
+/* Texte flottant (« +10 XP ») */
+.float-text {
+  position: fixed; z-index: 10000; pointer-events: none;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.4rem; color: var(--green);
+  text-shadow: 0 2px 0 var(--surface), 0 0 18px var(--surface);
+  animation: float-up 1.3s var(--ease-out) forwards;
+}
+.float-text.xp { color: var(--orange); }
+
+/* Ondulation des boutons */
+.ripple {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: currentColor; opacity: .3;
+  animation: ripple .65s var(--ease-out) forwards;
+}
+
+/* Rosette : pétales qui s'ouvrent */
+.rosette.bloom .ro-outer path, .rosette.bloom .ro-mid path { transform-box: view-box; transform-origin: 0 0; animation: petal-in .7s var(--ease-spring) both; }
+.rosette.bloom .ro-outer path { animation-delay: calc(var(--i) * 40ms); }
+.rosette.bloom .ro-mid path { animation-delay: calc(var(--i) * 40ms + 220ms); }
+
+/* ───────────── Mascotte ───────────── */
+svg.bird { overflow: visible; }
+svg.bird * { transform-box: view-box; }
+.bird .b-shadow { fill: rgba(0, 0, 0, .13); transform-origin: 104px 188px; animation: bird-shadow 3.2s ease-in-out infinite; }
+.bird .b-all { transform-origin: 104px 180px; animation: bird-bob 3.2s ease-in-out infinite; }
+.bird .b-tail { transform-origin: 66px 130px; animation: bird-tail 3.2s ease-in-out infinite; }
+.bird .b-wing { transform-origin: 138px 106px; }
+.bird .b-head { transform-origin: 146px 104px; animation: bird-head 6.4s ease-in-out infinite; }
+.bird .b-lid { transform-origin: 153px 69px; transform: scaleY(0); animation: bird-blink 4.6s infinite; }
+.bird .b-crest { transform-origin: 143px 62px; animation: bird-crest 3.2s ease-in-out infinite; }
+.bird .b-beak-bot { transform-origin: 170px 90px; }
+.bird .b-zzz, .bird .b-notes { opacity: 0; font-family: var(--font-display); font-weight: 800; fill: var(--ink-3); font-size: 18px; }
+.bird .b-notes { fill: var(--orange); font-size: 22px; }
+
+@keyframes bird-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes bird-shadow { 0%, 100% { transform: scaleX(1); opacity: 1; } 50% { transform: scaleX(.88); opacity: .75; } }
+@keyframes bird-tail { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(5deg); } }
+@keyframes bird-head { 0%, 40%, 100% { transform: rotate(0); } 48%, 60% { transform: rotate(-7deg); } 70% { transform: rotate(3deg); } }
+@keyframes bird-blink { 0%, 92%, 100% { transform: scaleY(0); } 95% { transform: scaleY(1); } }
+@keyframes bird-crest { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
+@keyframes bird-flap { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-32deg); } 60% { transform: rotate(8deg); } }
+@keyframes bird-hop {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  15% { transform: translateY(2px) scale(1.06, .93); }
+  45% { transform: translateY(-24px) scale(.96, 1.05); }
+  75% { transform: translateY(0) scale(1.05, .95); }
+}
+@keyframes bird-talk { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(16deg); } }
+@keyframes bird-sad { to { transform: rotate(12deg) translateY(4px); } }
+@keyframes note-float { 0% { opacity: 0; transform: translate(0, 8px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translate(-10px, -34px) rotate(-14deg); } }
+@keyframes zzz { 0% { opacity: 0; transform: translate(0, 6px) scale(.6); } 40% { opacity: 1; } 100% { opacity: 0; transform: translate(10px, -20px) scale(1.1); } }
+
+.bird.mood-happy .b-all { animation: bird-hop .75s var(--ease-out) 2; }
+.bird.mood-happy .b-wing { animation: bird-flap .38s ease-in-out 4; }
+.bird.mood-happy .b-notes { opacity: 1; }
+.bird.mood-happy .b-notes text { animation: note-float 1.4s ease-out infinite; }
+.bird.mood-happy .b-notes text + text { animation-delay: .5s; }
+.bird.mood-sad .b-head { animation: bird-sad .5s var(--ease-out) forwards; }
+.bird.mood-sad .b-tail { animation: none; transform: rotate(14deg); transition: transform .5s; }
+.bird.mood-sad .b-pupil { transform: translate(-1px, 2.5px); }
+.bird.mood-sleep .b-lid { animation: none; transform: scaleY(1); }
+.bird.mood-sleep .b-all { animation-duration: 4.8s; }
+.bird.mood-sleep .b-zzz { opacity: 1; }
+.bird.mood-sleep .b-zzz text { animation: zzz 2.4s ease-in-out infinite; }
+.bird.mood-sleep .b-zzz text:nth-child(2) { animation-delay: .6s; }
+.bird.mood-sleep .b-zzz text:nth-child(3) { animation-delay: 1.2s; }
+.bird.mood-think .b-head { animation: none; transform: rotate(-10deg); transition: transform .5s var(--ease-spring); }
+.bird.talking .b-beak-bot, .bird.mood-talk .b-beak-bot { animation: bird-talk .22s ease-in-out infinite; }
+.bird.mood-cheer .b-wing { animation: bird-flap .5s ease-in-out infinite; }
+.bird.mood-cheer .b-all { animation: bird-hop 1s var(--ease-out) infinite; }
+
+/* ───────────── Transitions de vues (API View Transitions) ───────────── */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(page) { animation: vt-out .32s var(--ease-in-out) both; }
+::view-transition-new(page) { animation: vt-in .62s var(--ease-out) both; }
+::view-transition-old(page-title) { animation: vt-title-out .3s var(--ease-in-out) both; }
+::view-transition-new(page-title) { animation: vt-title-in .55s var(--ease-out) both; }
+/* Barre du haut et onglets mobiles : capturés à part, affichés immédiatement et au-dessus du contenu qui glisse. */
+::view-transition-group(topbar), ::view-transition-group(tabbar) { animation: none; z-index: 10; }
+::view-transition-group(page-title) { z-index: 11; }
+::view-transition-old(topbar), ::view-transition-old(tabbar) { display: none; }
+::view-transition-new(topbar), ::view-transition-new(tabbar) { animation: none; }
+@keyframes vt-out { to { opacity: 0; transform: translateY(-14px) scale(.985); filter: blur(6px); } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(26px) scale(.99); filter: blur(8px); } }
+@keyframes vt-title-out { to { opacity: 0; transform: translateY(-12px); } }
+@keyframes vt-title-in { from { opacity: 0; transform: translateY(14px); } }
+
+/* Repli sans View Transitions */
+.view.enter { animation: rise-blur .6s var(--ease-out) both; }
+
+/* ───────────── Mouvement réduit ───────────── */
+[data-motion="reduced"] *, [data-motion="reduced"] *::before, [data-motion="reduced"] *::after {
+  animation-duration: .001ms !important;
+  animation-iteration-count: 1 !important;
+  animation-delay: 0ms !important;
+  transition-duration: .001ms !important;
+  scroll-behavior: auto !important;
+}
+[data-motion="reduced"] .rv { opacity: 1; transform: none; }
+[data-motion="reduced"] .bird .b-lid { transform: scaleY(0); }
+[data-motion="reduced"] .bird.mood-sleep .b-lid { transform: scaleY(1); }
+[data-motion="reduced"] ::view-transition-group(*),
+[data-motion="reduced"] ::view-transition-old(*),
+[data-motion="reduced"] ::view-transition-new(*) { animation: none !important; }

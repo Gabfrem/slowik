@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Słowik — apprendre le polonais, mot à mot : leçons, prononciation, grammaire, dialogues et répétition espacée.">
+  <title>Słowik — Apprendre le polonais</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#F5EDDE" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#13111C" media="(prefers-color-scheme: dark)">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Słowik">
+  <link rel="stylesheet" href="assets/fonts/fonts.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/anim.css">
+  <link rel="stylesheet" href="css/shell.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/views.css">
+  <link rel="stylesheet" href="css/session.css">
+  <script>
+    /* Applique le thème et le niveau d'animation avant le premier rendu (évite un flash). */
+    try {
+      var st = (JSON.parse(localStorage.getItem('slowik.v1') || '{}').settings) || {};
+      if (st.theme && st.theme !== 'auto') document.documentElement.setAttribute('data-theme', st.theme);
+      if (st.motion === 'reduced' || (st.motion === 'auto' && matchMedia('(prefers-reduced-motion: reduce)').matches)) document.documentElement.setAttribute('data-motion', 'reduced');
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div id="bg" aria-hidden="true"></div>
+
+  <div id="app" class="app">
+    <aside id="sidebar" class="sidebar" aria-label="Navigation principale"></aside>
+    <main id="main" class="main">
+      <header id="topbar" class="topbar"></header>
+      <section id="view" class="view" tabindex="-1"></section>
+    </main>
+    <nav id="tabbar" class="tabbar" aria-label="Navigation"></nav>
+  </div>
+
+  <div id="overlay"></div>
+  <div id="modals"></div>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="tip" role="tooltip"></div>
+  <div id="splash" aria-hidden="true"></div>
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <noscript>
+    <p style="padding:2rem;font:16px sans-serif">Słowik a besoin de JavaScript pour fonctionner. Active-le dans ton navigateur.</p>
+  </noscript>
+
+  <!-- Cœur -->
+  <script src="js/core/util.js"></script>
+  <script src="js/config.js"></script>
+  <!-- Client Supabase officiel (v2.117.2), embarqué pour fonctionner sans CDN -->
+  <script src="assets/vendor/supabase.js"></script>
+  <!-- Contenu pédagogique -->
+  <script src="js/data/units.js"></script>
+  <script src="js/data/alphabet.js"></script>
+  <script src="js/data/grammar.js"></script>
+  <script src="js/data/dialogues.js"></script>
+  <script src="js/data/extras.js"></script>
+  <!-- Moteurs -->
+  <script src="js/core/phonetics.js"></script>
+  <script src="js/core/store.js"></script>
+  <script src="js/core/srs.js"></script>
+  <script src="js/core/content.js"></script>
+  <script src="js/core/cloud.js"></script>
+  <script src="js/core/audio.js"></script>
+  <script src="js/core/fx.js"></script>
+  <script src="js/core/ui.js"></script>
+  <script src="js/engine/exercises.js"></script>
+  <script src="js/engine/session.js"></script>
+  <!-- Écrans -->
+  <script src="js/views/home.js"></script>
+  <script src="js/views/path.js"></script>
+  <script src="js/views/review.js"></script>
+  <script src="js/views/sounds.js"></script>
+  <script src="js/views/grammar.js"></script>
+  <script src="js/views/dialogues.js"></script>
+  <script src="js/views/gym.js"></script>
+  <script src="js/views/lexicon.js"></script>
+  <script src="js/views/culture.js"></script>
+  <script src="js/views/stats.js"></script>
+  <script src="js/views/settings.js"></script>
+  <script src="js/views/onboarding.js"></script>
+  <script src="js/views/account.js"></script>
+  <!-- Démarrage -->
+  <script src="js/core/router.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
