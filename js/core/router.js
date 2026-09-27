@@ -50,6 +50,11 @@
         pill.style.opacity = 1;
         pill.style.transform = `translateY(${act.offsetTop}px)`;
         pill.style.height = act.offsetHeight + 'px';
+        // Fenêtre basse : la liste défile, on garde la page active visible.
+        const top = act.offsetTop;
+        const bottom = top + act.offsetHeight;
+        if (top < nav.scrollTop || bottom > nav.scrollTop + nav.clientHeight)
+          nav.scrollTo({ top: top - (nav.clientHeight - act.offsetHeight) / 2, behavior: 'smooth' });
       } else pill.style.opacity = 0;
     }
     const tp = $('.tab-pill');

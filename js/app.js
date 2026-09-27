@@ -235,8 +235,12 @@
     return new Promise((resolve) => {
       const el = $('#splash');
       if (S.fx.reduced()) {
-        el.innerHTML = '';
-        return resolve();
+        el.classList.add('out');
+        return setTimeout(() => {
+          el.innerHTML = '';
+          el.classList.remove('out');
+          resolve();
+        }, 300);
       }
       el.innerHTML = `
         <div class="splash-inner">
@@ -250,7 +254,7 @@
           <svg class="splash-stitch" viewBox="0 0 180 12"><path d="M4 6 C 40 -2, 70 14, 90 6 S 150 -2, 176 6" pathLength="100" style="stroke-dasharray:100;stroke-dashoffset:100;animation:draw 1.1s var(--ease-out) 1.2s forwards"/></svg>
           <div class="splash-tag">Le polonais, mot à mot</div>
         </div>
-        <div class="splash-skip">Cliquer pour passer</div>`;
+        <div class="splash-skip">Appuyer pour passer</div>`;
       let done = false;
       const finish = () => {
         if (done) return;
@@ -274,6 +278,9 @@
   buildShell();
   S.router.init();
   S.cloud.init();
+
+  /* Téléphone : comme une vraie app, pas de zoom par pincement (iOS ignore « user-scalable=no »). */
+  ['gesturestart', 'gesturechange'].forEach((t) => document.addEventListener(t, (e) => e.preventDefault(), { passive: false }));
   setTimeout(() => S.router.movePill(), 60);
   window.addEventListener('load', () => S.router.movePill());
   document.fonts && document.fonts.ready.then(() => S.router.movePill());

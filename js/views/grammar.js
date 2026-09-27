@@ -88,7 +88,7 @@
     const P = S.data.persons;
     const html = `
       <div class="widget conj">
-        <div class="w-head">${icon('refresh', 18)}<b>Conjugaison au présent</b><span class="muted small">Clique sur une forme pour l’entendre.</span></div>
+        <div class="w-head">${icon('refresh', 18)}<b>Conjugaison au présent</b><span class="muted small">Appuie sur une forme pour l’entendre.</span></div>
         ${V.length > 1 ? `<div class="decl-picker">${V.map((v, i) => `<button type="button" class="chip chip-btn ${i ? '' : 'on'}" data-v="${i}"><span class="pl">${v.inf}</span> <small>${v.fr}</small></button>`).join('')}</div>` : ''}
         <div class="conj-out"></div>
       </div>`;
@@ -113,7 +113,7 @@
     const items = shuffle(S.data.genderSort).slice(0, 12);
     const html = `
       <div class="widget sortg">
-        <div class="w-head">${icon('puzzle', 18)}<b>À toi de jouer : trie les mots par genre</b><span class="muted small">Clique sur un mot, puis sur son panier (ou glisse-le).</span></div>
+        <div class="w-head">${icon('puzzle', 18)}<b>À toi de jouer : trie les mots par genre</b><span class="muted small">Appuie sur un mot, puis sur son panier (ou glisse-le).</span></div>
         <div class="sort-pool">${items.map(([w, g], i) => `<button type="button" class="tile pl-tile sort-w" draggable="true" data-g="${g}" data-w="${esc(w)}" style="--i:${i}">${esc(w)}</button>`).join('')}</div>
         <div class="sort-bins">
           ${[['m', 'Masculin', 'mój · ten'], ['f', 'Féminin', 'moja · ta'], ['n', 'Neutre', 'moje · to']].map(([g, l, h]) => `<div class="bin g-${g}" data-bin="${g}"><div class="bin-head"><b>${l}</b><span class="pl">${h}</span></div><div class="bin-body"></div></div>`).join('')}

@@ -52,7 +52,7 @@
           <div class="lx-head card paper rv" style="--layer:var(--teal)">
             <div class="grow">
               <h2>${C.words.length} mots, ${nLearned} dans ton jardin</h2>
-              <p class="muted">Cherche en polonais ou en français (les accents sont facultatifs). Clique sur un mot pour sa fiche complète.</p>
+              <p class="muted">Cherche en polonais ou en français (les accents sont facultatifs). Appuie sur un mot pour sa fiche complète.</p>
             </div>
             <div class="lx-count">${S.ui.ring(nLearned / C.words.length, { size: 92, stroke: 9, color: 'var(--teal)' })}<b class="display">${Math.round((nLearned / C.words.length) * 100)}%</b></div>
           </div>

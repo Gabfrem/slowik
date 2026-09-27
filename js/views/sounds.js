@@ -45,7 +45,7 @@
       <div class="abc-intro card paper rv" style="--layer:var(--blue)">
         <div class="grow">
           <h3>32 lettres + 7 groupes de lettres</h3>
-          <p class="muted">Bonne nouvelle : chaque lettre se prononce toujours de la même façon. Clique sur une lettre pour l’entendre dans des mots, avec sa prononciation « à la française ». Les lettres en rouge n’existent pas en français.</p>
+          <p class="muted">Bonne nouvelle : chaque lettre se prononce toujours de la même façon. Appuie sur une lettre pour l’entendre dans des mots, avec sa prononciation « à la française ». Les lettres en rouge n’existent pas en français.</p>
           <div class="abc-filters row wrap">
             ${[['all', 'Toutes'], ['special', 'Spéciales'], ['vowel', 'Voyelles'], ['digraph', 'Digrammes']].map(([k, l], i) => `<button type="button" class="chip chip-btn ${i ? '' : 'on'}" data-f="${k}">${l}</button>`).join('')}
             <span class="chip heard-count">${icon('ear', 14)}<span><b class="hc-n">${heard.size}</b>/${all.length} écoutées</span></span>
@@ -228,7 +228,7 @@
       </div>
       <div class="stress-game card mt">
         <div class="pg-top"><span class="chip">${icon('target', 14)} Mot <b class="sg-k">1</b>/${rounds.length}</span><span class="chip">${icon('star', 14)} <b class="sg-s">0</b></span></div>
-        <p class="center muted">Clique sur la voyelle accentuée :</p>
+        <p class="center muted">Appuie sur la voyelle accentuée :</p>
         <div class="sg-body"></div>
       </div>`;
     const body = pane.querySelector('.sg-body');

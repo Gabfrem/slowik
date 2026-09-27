@@ -5,6 +5,9 @@
   const { rand, pick, clamp, cssVar } = S.util;
 
   const reduced = () => document.documentElement.getAttribute('data-motion') === 'reduced';
+  /* Taille de la fenêtre visible (fiable aussi sur téléphone). */
+  const VW = () => document.documentElement.clientWidth || innerWidth;
+  const VH = () => document.documentElement.clientHeight || innerHeight;
 
   /* ───────────── Confettis (papier découpé) ───────────── */
   const canvas = document.getElementById('fx');
@@ -14,10 +17,8 @@
   let dpr = 1;
   function resize() {
     dpr = Math.min(2, window.devicePixelRatio || 1);
-    canvas.width = innerWidth * dpr;
-    canvas.height = innerHeight * dpr;
-    canvas.style.width = innerWidth + 'px';
-    canvas.style.height = innerHeight + 'px';
+    canvas.width = Math.round(VW() * dpr);
+    canvas.height = Math.round(VH() * dpr);
   }
   resize();
   window.addEventListener('resize', resize);
@@ -72,7 +73,7 @@
     ctx2d.setTransform(1, 0, 0, 1, 0, 0);
     ctx2d.clearRect(0, 0, canvas.width, canvas.height);
     const now = performance.now();
-    parts = parts.filter((p) => now - p.born < p.life && p.y < innerHeight + 60);
+    parts = parts.filter((p) => now - p.born < p.life && p.y < VH() + 60);
     parts.forEach((p) => {
       p.vx *= p.drag;
       p.vy = p.vy * p.drag + p.g;
@@ -114,8 +115,8 @@
   /* Explosion depuis un point (ou un élément). */
   function burst(at, n = 60, power = 11) {
     if (reduced()) n = Math.min(n, 18);
-    let x = innerWidth / 2;
-    let y = innerHeight / 2;
+    let x = VW() / 2;
+    let y = VH() / 2;
     if (at && at.getBoundingClientRect) {
       const r = at.getBoundingClientRect();
       x = r.left + r.width / 2;
@@ -136,7 +137,7 @@
     if (reduced()) n = 30;
     const cols = palette();
     for (let i = 0; i < n; i++) {
-      const p = particle(rand(0, innerWidth), rand(-innerHeight * 0.5, -20), rand(-2, 2), rand(1, 5), cols);
+      const p = particle(rand(0, VW()), rand(-VH() * 0.5, -20), rand(-2, 2), rand(1, 5), cols);
       p.life = rand(3500, 5500);
       spawn(p);
     }
@@ -146,8 +147,8 @@
     if (reduced()) n = 20;
     const cols = palette();
     for (let i = 0; i < n; i++) {
-      spawn(particle(-10, innerHeight * 0.75, rand(8, 19), rand(-19, -9), cols));
-      spawn(particle(innerWidth + 10, innerHeight * 0.75, rand(-19, -8), rand(-19, -9), cols));
+      spawn(particle(-10, VH() * 0.75, rand(8, 19), rand(-19, -9), cols));
+      spawn(particle(VW() + 10, VH() * 0.75, rand(-19, -8), rand(-19, -9), cols));
     }
   }
 
@@ -244,8 +245,8 @@
     const el = document.createElement('div');
     el.className = 'float-text ' + cls;
     el.textContent = text;
-    let x = innerWidth / 2;
-    let y = innerHeight / 2;
+    let x = VW() / 2;
+    let y = VH() / 2;
     if (at && at.getBoundingClientRect) {
       const r = at.getBoundingClientRect();
       x = r.left + r.width / 2;
@@ -258,10 +259,13 @@
   }
 
   /* Découpe un texte en lettres animables. */
+  /* Chaque mot reste d'un seul tenant : la coupure de ligne se fait entre les mots, jamais au milieu. */
   function letters(text, cls = 'ltr') {
-    return Array.from(String(text))
-      .map((ch, i) => (ch === ' ' ? '<span class="ltr-sp"> </span>' : `<span class="${cls}" style="--i:${i}">${S.util.esc(ch)}</span>`))
-      .join('');
+    let i = 0;
+    return String(text)
+      .split(' ')
+      .map((word) => `<span class="ltr-word">${Array.from(word).map((ch) => `<span class="${cls}" style="--i:${i++}">${S.util.esc(ch)}</span>`).join('')}</span>`)
+      .join('<span class="ltr-sp"> </span>');
   }
 
   /* ───────────── Apparition au défilement ───────────── */
@@ -384,8 +388,8 @@
     let cy = ty;
     let ticking = false;
     window.addEventListener('pointermove', (e) => {
-      tx = e.clientX / innerWidth;
-      ty = e.clientY / innerHeight;
+      tx = e.clientX / VW();
+      ty = e.clientY / VH();
       if (!ticking) {
         ticking = true;
         requestAnimationFrame(tick);
@@ -394,8 +398,8 @@
     function tick() {
       cx += (tx - cx) * 0.12;
       cy += (ty - cy) * 0.12;
-      bg.style.setProperty('--sx', (cx * innerWidth).toFixed(1) + 'px');
-      bg.style.setProperty('--sy', (cy * innerHeight).toFixed(1) + 'px');
+      bg.style.setProperty('--sx', (cx * VW()).toFixed(1) + 'px');
+      bg.style.setProperty('--sy', (cy * VH()).toFixed(1) + 'px');
       bg.style.setProperty('--px', (cx - 0.5).toFixed(3));
       bg.style.setProperty('--py', (cy - 0.5).toFixed(3));
       if (Math.abs(tx - cx) > 0.001 || Math.abs(ty - cy) > 0.001) requestAnimationFrame(tick);

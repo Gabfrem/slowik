@@ -139,6 +139,9 @@
         <div class="hm-main"><div class="hm-months">${months}</div><div class="hm-grid">${cols}</div></div>
       </div>
       <div class="hm-legend"><span class="small muted">Moins</span>${[0, 1, 2, 3, 4].map((l) => `<span class="hm-cell l${l}"></span>`).join('')}<span class="small muted">Plus</span><span class="small muted hm-note">· niveaux relatifs à ton objectif de ${goal} XP</span></div>`;
+    /* Sur petit écran, la frise défile : on montre d'abord les semaines récentes. */
+    const hw = host.querySelector('.hm-wrap');
+    requestAnimationFrame(() => { hw.scrollLeft = hw.scrollWidth; });
     const tip = chartTip(host);
     host.querySelectorAll('.hm-cell[data-k]').forEach((c) => {
       const show = () => tip.show(c, `${c.dataset.xp} XP`, fmtDate(c.dataset.k));
@@ -243,9 +246,11 @@
         </section>`;
 
       const xpHost = el.querySelector('.xp-chart');
+      const mHost = el.querySelector('.mastery-chart');
       const draw = () => {
+        if (!xpHost.isConnected) return; // page déjà quittée
         xpChart(xpHost);
-        mastery(el.querySelector('.mastery-chart'));
+        mastery(mHost);
       };
       requestAnimationFrame(draw);
       heatmap(el.querySelector('.heatmap'));
@@ -265,7 +270,10 @@
         rt = setTimeout(draw, 150);
       };
       window.addEventListener('resize', onResize);
-      return () => window.removeEventListener('resize', onResize);
+      return () => {
+        clearTimeout(rt);
+        window.removeEventListener('resize', onResize);
+      };
     },
   };
 })();

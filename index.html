@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="Słowik — apprendre le polonais, mot à mot : leçons, prononciation, grammaire, dialogues et répétition espacée.">
   <title>Słowik — Apprendre le polonais</title>
@@ -22,6 +22,7 @@
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/views.css">
   <link rel="stylesheet" href="css/session.css">
+  <link rel="stylesheet" href="css/mobile.css">
   <script>
     /* Applique le thème et le niveau d'animation avant le premier rendu (évite un flash). */
     try {
@@ -47,7 +48,13 @@
   <div id="modals"></div>
   <div id="toasts" aria-live="polite"></div>
   <div id="tip" role="tooltip"></div>
-  <div id="splash" aria-hidden="true"></div>
+  <div id="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <div class="splash-art"><img class="splash-logo" src="assets/icon.svg" alt=""></div>
+      <div class="splash-title display">Słowik</div>
+      <div class="splash-tag">Le polonais, mot à mot</div>
+    </div>
+  </div>
   <canvas id="fx" aria-hidden="true"></canvas>
 
   <noscript>

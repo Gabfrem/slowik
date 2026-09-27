@@ -24,7 +24,7 @@
         <div class="ob-step ob-welcome">
           <div class="ob-art">${S.ui.orn.rosette({ petals: 14, colors: ['var(--red)', 'var(--yellow)', 'var(--green)'], cls: 'bloom' })}${mascot('cheer', 180)}</div>
           <h1 class="display ob-hello">${S.fx.letters('Cześć!')}</h1>
-          <p class="ob-lead">Je suis <strong class="pl">Słowik</strong>, le rossignol. Je vais t’apprendre le polonais, <em>mot à mot</em> : des leçons courtes, la bonne prononciation, et des révisions au moment idéal.</p>
+          <p class="ob-lead">Je suis <strong class="pl">Słowik</strong>, le rossignol. Je vais t’apprendre le polonais, <em>mot à mot</em>&nbsp;: des leçons courtes, la bonne prononciation, et des révisions au moment idéal.</p>
           <div class="ob-actions">
             <button type="button" class="btn btn-primary btn-lg" data-next data-magnet>C’est parti ! ${icon('arrowR', 20)}</button>
             ${S.cloud.available ? `<button type="button" class="btn btn-soft btn-lg" data-login>${icon('user', 18)} J’ai déjà un compte</button>` : ''}
@@ -50,7 +50,7 @@
       () => `
         <div class="ob-step">
           <h2>Écoute ta première phrase</h2>
-          <p class="muted">Clique sur le haut-parleur :</p>
+          <p class="muted">Appuie sur le haut-parleur :</p>
           <div class="ob-voice">
             ${say('Dzień dobry! Miło mi cię poznać.', { big: true })}
             <div><div class="pl ob-voice-pl">Dzień dobry! Miło mi cię poznać.</div><div class="muted">Bonjour ! Ravi de te connaître.</div><div class="small">${S.ui.hint('Dzień dobry! Miło mi cię poznać.')}</div></div>

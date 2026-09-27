@@ -6,7 +6,7 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "any",
+  "orientation": "portrait",
   "background_color": "#1D1A2C",
   "theme_color": "#1D1A2C",
   "categories": ["education"],

@@ -31,7 +31,7 @@
               <div class="acct-sent a-pop">
                 <span class="acct-mail">${icon('mail', 34)}</span>
                 <p>${sentKind === 'signup' ? 'Presque fini ! Un lien de confirmation a été envoyé à' : 'Un lien pour choisir un nouveau mot de passe a été envoyé à'} <strong>${esc(sentTo)}</strong>.</p>
-                <p class="small muted">${sentKind === 'signup' ? 'Clique sur le lien reçu, puis reviens te connecter ici.' : 'Ouvre le lien reçu pour définir ton nouveau mot de passe.'} Pense à regarder dans les indésirables.</p>
+                <p class="small muted">${sentKind === 'signup' ? 'Ouvre le lien reçu, puis reviens te connecter ici.' : 'Ouvre le lien reçu pour définir ton nouveau mot de passe.'} Pense à regarder dans les indésirables.</p>
               </div>
               <button type="button" class="btn btn-primary btn-block btn-lg" data-mode="login">J’ai confirmé, me connecter</button>`;
           } else {

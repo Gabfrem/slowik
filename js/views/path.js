@@ -122,7 +122,23 @@
       ${stt === 'locked' ? `<p class="small np-lock">${icon('lock', 16)} Termine l’étape précédente pour débloquer celle-ci.</p>` : `<button type="button" class="btn btn-block np-go" style="${cvars(u.color)};--fg:#fff">${icon('play', 18)}<span>${stt === 'done' ? 'Rejouer (+XP)' : isCh ? 'Relever le défi' : 'Commencer'}</span></button>`}`;
     const wrap = btn.closest('.node-wrap');
     wrap.appendChild(pop);
-    requestAnimationFrame(() => pop.classList.add('show'));
+    wrap.classList.add('popped');
+    wrap.closest('.unit')?.classList.add('popped');
+    /* Garde la bulle entièrement à l'écran (téléphone) : décalage horizontal + flèche recentrée. */
+    const vw = document.documentElement.clientWidth;
+    const wr = wrap.getBoundingClientRect();
+    const cx = wr.left + wr.width / 2;
+    const half = pop.offsetWidth / 2;
+    const dx = cx - half < 12 ? 12 - (cx - half) : cx + half > vw - 12 ? vw - 12 - (cx + half) : 0;
+    pop.style.setProperty('--dx', `${Math.round(dx)}px`);
+    requestAnimationFrame(() => {
+      pop.classList.add('show');
+      const r = pop.getBoundingClientRect();
+      const tab = document.querySelector('.tabbar');
+      const floor = (tab && getComputedStyle(tab).display !== 'none' ? tab.getBoundingClientRect().top : innerHeight) - 16;
+      const over = r.top + pop.offsetHeight - floor;
+      if (over > 0) scrollBy({ top: over, behavior: S.fx.reduced() ? 'auto' : 'smooth' });
+    });
     const go = pop.querySelector('.np-go');
     if (go) go.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -132,6 +148,7 @@
     pop.addEventListener('click', (e) => e.stopPropagation());
   }
   function closePop(root) {
+    root.querySelectorAll('.popped').forEach((w) => w.classList.remove('popped'));
     root.querySelectorAll('.node-pop').forEach((p) => {
       p.classList.remove('show');
       setTimeout(() => p.remove(), 250);

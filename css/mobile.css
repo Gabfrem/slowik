@@ -1,0 +1,154 @@
+/* Słowik — expérience téléphone : se comporter comme une application native.
+   (Chargée en dernier : elle ajuste les autres feuilles sur petit écran.) */
+
+/* Calque des confettis : toujours par-dessus l'écran, jamais dans la page. */
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 700; pointer-events: none; }
+
+html, body { overflow-x: hidden; overflow-x: clip; max-width: 100%; }
+html { -webkit-tap-highlight-color: transparent; }
+
+/* Les colonnes des pages ne s'élargissent jamais au-delà de l'écran à cause d'un contenu large
+   (frise, tableau…) : ce contenu défile dans son propre cadre. */
+.home, .grammar, .dialogues, .gym, .lexicon, .culture, .settings, .stats, .garden, .pairs-game,
+.stress-game, .rd-lines, .lx-list, .quiz-q, .sp-q, .guide-words, .guide-sents, .widget, .set-card { grid-template-columns: minmax(0, 1fr); }
+
+/* Écran de chargement présent dès le premier affichage (avant même le JavaScript). */
+.splash-logo { width: 46%; height: 46%; animation: pop-in .8s var(--ease-spring) both, spin 14s linear .8s infinite; filter: drop-shadow(0 10px 22px rgba(0, 0, 0, .25)); }
+
+@media (max-width: 820px) {
+  html, body { overscroll-behavior-y: none; }
+  body { touch-action: manipulation; -webkit-text-size-adjust: 100%; }
+  input, textarea, select { font-size: max(16px, 1em); } /* évite le zoom auto d'iOS au focus */
+  img, svg { -webkit-touch-callout: none; }
+  .tabbar, .topbar, .btn, .tab, .pill, .opt, .tile, .nav-tile, .node { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+  /* ── En-tête compact, sous la barre d'état ── */
+  :root { --topbar-h: 56px; --gutter: 14px; }
+  .topbar { min-height: auto; gap: 8px; padding: calc(8px + env(safe-area-inset-top)) 12px 8px; }
+  .tb-brand { width: 34px; height: 34px; margin-left: 0; }
+  .tb-brand svg { width: 34px; height: 34px; }
+  .tb-title { flex: 1 1 auto; min-width: 0; }
+  .tb-title .eyebrow { font-size: .7rem; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tb-title h1 { font-size: 1.15rem; line-height: 1.15; }
+  .tb-right { gap: 6px; flex: none; }
+  .pill { height: 34px; padding: 0 9px 0 7px; gap: 5px; font-size: .82rem; box-shadow: none; }
+  .pill .flame .ic { width: 18px; height: 18px; }
+  .pill.goal { padding-left: 3px; }
+  .pill.goal .ring { width: 28px; height: 28px; }
+  .pill:hover { transform: none; }
+
+  /* ── Contenu ── */
+  .view { padding: 4px 14px calc(92px + env(safe-area-inset-bottom)); }
+  .card { padding: 18px; border-radius: 20px; }
+  .card.paper { box-shadow: 5px 6px 0 -1px var(--layer, var(--bg-2)), var(--shadow-1); }
+  .section-head { margin: 28px 0 12px; }
+  .section-head h2 { font-size: 1.3rem; }
+
+  /* ── Barre d'onglets ancrée en bas, comme une app native ── */
+  .tabbar {
+    left: 0; right: 0; bottom: 0; height: auto; border-radius: 22px 22px 0 0;
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    border-width: 1px 0 0; box-shadow: 0 -8px 28px rgba(0, 0, 0, .18);
+    background: color-mix(in srgb, var(--surface) 97%, transparent);
+  }
+  .tab { height: 56px; font-size: .66rem; gap: 3px; }
+  .tab-pill { top: 6px; bottom: auto; height: 56px; left: 8px; width: calc((100% - 16px) / 5); }
+  .tab .sb-badge { top: 3px; }
+
+  #toasts { bottom: calc(84px + env(safe-area-inset-bottom)); }
+
+  /* ── Accueil resserré ── */
+  .hero { padding: 18px 16px 20px; gap: 6px; border-radius: 24px; }
+  .hero-art { min-height: 150px; }
+  .hero-rosette { width: 165px; height: 165px; }
+  .hero-art::before { width: 104px; height: 104px; }
+  .hero-art .bird { width: 118px; height: 118px; }
+  .hero-bubble { top: 0; right: 0; padding: 7px 11px; border-radius: 14px 14px 14px 4px; }
+  .hero-bubble .pl { font-size: .92rem; }
+  .hero-bubble .small { font-size: .74rem; }
+  .hero-date { font-size: .85rem; margin-bottom: 4px; }
+  .hero-title { font-size: clamp(1.8rem, 8.4vw, 2.4rem); }
+  .hero-sub { font-size: .98rem; margin: 8px 0 16px; }
+  .hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .hero-actions .btn { min-height: 50px; padding: 0 12px; font-size: .95rem; }
+  .hero-progress { margin-top: 16px; }
+  .home-grid { gap: 14px; }
+  .cc-top { gap: 12px; }
+  .cc-num { font-size: 2.6rem; }
+  .cc-title { font-size: 1.35rem; }
+  .cc-icon { --sz: 58px !important; font-size: 1.7rem; }
+  .cc-bottom { flex-direction: column; align-items: stretch; gap: 12px; }
+  .cc-go { width: 100%; }
+  .goal-body { gap: 14px; }
+  .goal-ring { width: 104px; height: 104px; }
+  .goal-ring .ring { width: 104px; height: 104px; }
+  .goal-num b { font-size: 1.7rem; }
+  .wk-dot { width: 28px; height: 28px; }
+  .quick { padding: 14px; }
+  .q-ico { width: 48px; height: 48px; border-radius: 15px; }
+
+  /* ── Séances plein écran ── */
+  .ss-top { padding: calc(10px + env(safe-area-inset-top)) 14px 6px; gap: 10px; grid-template-columns: auto 1fr 64px; }
+  .ss-stage-wrap { padding: 6px 14px 28px; }
+  .ss-foot-inner { min-height: 0; padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); }
+  .ss-check { min-width: 0; }
+  .fb-inner { padding: 14px 14px calc(14px + env(safe-area-inset-bottom)); gap: 10px; }
+  .fb-title { font-size: 1.2rem; }
+  .fb-title .pl { font-size: 1.3rem; }
+  .ex { gap: 16px; }
+  .ex-title { font-size: 1.35rem; }
+  .opt { min-height: 56px; padding: 10px 12px; font-size: 1rem; }
+  .intro-card { padding: 22px 16px; border-radius: 24px; }
+  .say-big { width: 78px; height: 78px; border-radius: 26px; }
+  .build-prompt .bird { width: 70px; height: 70px; }
+  .bubble { font-size: 1.05rem; padding: 12px 14px; margin-bottom: 18px; }
+  .tile { height: 44px; padding: 0 13px; font-size: 1rem; }
+  .pl-key { width: 38px; height: 40px; }
+  .results { gap: 10px; }
+  .res-art { width: 190px; height: 190px; }
+  .res-art .bird { width: 130px; height: 130px; }
+
+  /* ── Fenêtres ── */
+  .modal-back { padding: 12px; align-items: end; }
+  .modal { padding: 22px 18px calc(18px + env(safe-area-inset-bottom)); border-radius: 26px; max-height: calc(100dvh - 24px); }
+  .modal-title { font-size: 1.35rem; }
+
+  /* Transitions de pages plus légères (le flou coûte cher sur téléphone) */
+  ::view-transition-old(page) { animation: vt-out-m .2s ease-in both; }
+  ::view-transition-new(page) { animation: vt-in-m .34s var(--ease-out) both; }
+
+  /* Entrée de page sans flou (le flou plein écran saccade sur téléphone) */
+  .view.enter { animation: rise-m .42s var(--ease-out) both; }
+  .a-rise-blur { animation-name: rise-m; }
+  .modal-back, .modal-back.open { backdrop-filter: none; -webkit-backdrop-filter: none; background: color-mix(in srgb, #0d0b17 62%, transparent); }
+  .onboard { backdrop-filter: none; -webkit-backdrop-filter: none; background: color-mix(in srgb, var(--bg) 94%, transparent); }
+
+  /* Pas d'effets de survol sur écran tactile */
+  .card.hover:hover, .quick:hover, .gr-card:hover, .gym-card:hover { transform: none; }
+}
+@keyframes vt-out-m { to { opacity: 0; } }
+@keyframes vt-in-m { from { opacity: 0; transform: translateY(12px); } }
+@keyframes rise-m { from { opacity: 0; transform: translateY(14px); } }
+
+@media (max-width: 560px) {
+  .abc-intro > .bird { display: none; }
+  .heard-count { margin-left: 0; }
+  /* Réglages : le sélecteur passe sous son libellé et prend toute la largeur */
+  .set-row:has(> .seg) { flex-wrap: wrap; }
+  .set-row > .seg { display: grid; width: 100%; }
+  .seg button { padding: 0 8px; }
+}
+
+/* Petits téléphones */
+@media (max-width: 380px) {
+  .tb-title .eyebrow { display: none; }
+  .pill { padding: 0 7px 0 5px; }
+  .hero-actions { grid-template-columns: 1fr; }
+  .tab { font-size: .6rem; }
+}
+
+/* Écran tactile : pas de raccourcis clavier affichés */
+@media (hover: none) and (pointer: coarse) {
+  .kbd-hint, .opt .kbd, .grade .kbd, .gh .kbd { display: none; }
+  .set-card:has(.keys) { display: none; }
+}

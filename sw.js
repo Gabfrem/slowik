@@ -1,7 +1,7 @@
 /* Słowik — service worker : l'application reste utilisable hors-ligne.
    Stratégie « réseau d'abord » : en ligne, on sert toujours la dernière version publiée
    (et on la met en cache) ; hors-ligne, on sert la copie en cache. */
-const CACHE = 'slowik-v1';
+const CACHE = 'slowik-v2';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

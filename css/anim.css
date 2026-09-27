@@ -61,6 +61,7 @@
 /* Lettres animées */
 .ltr { display: inline-block; animation: letter-up .7s var(--ease-out) both; animation-delay: calc(var(--i, 0) * 45ms + var(--d0, 0ms)); }
 .ltr-sp { display: inline-block; width: .28em; }
+.ltr-word { display: inline-block; white-space: nowrap; }
 
 /* Texte flottant (« +10 XP ») */
 .float-text {

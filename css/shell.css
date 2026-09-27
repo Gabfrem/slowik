@@ -265,3 +265,17 @@
 /* Quand une séance couvre tout l'écran, le décor et l'application en dessous ne sont plus rendus. */
 body.covered #app, body.covered #bg { visibility: hidden; }
 body.covered #bg * { animation-play-state: paused !important; }
+
+/* Barre latérale sur écran peu haut (portable 13", fenêtre réduite) : plus compacte */
+@media (min-width: 821px) and (max-height: 900px) {
+  .sidebar { padding-top: 14px; gap: 8px; }
+  .sb-brand { padding-bottom: 6px; }
+  .sb-nav { gap: 1px; }
+  .sb-item { min-height: 44px; padding-top: 3px; padding-bottom: 3px; }
+  .sb-foot { gap: 8px; }
+}
+@media (min-width: 821px) and (max-height: 760px) {
+  .sb-txt i { display: none; }
+  .sb-item { min-height: 40px; }
+  .sb-level { display: none; }
+}
