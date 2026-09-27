@@ -9,5 +9,5 @@ S.config = {
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5eXdvcnVnYWdzZXlnZ3NzaW1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA1MjQxNTcsImV4cCI6MjEwNjEwMDE1N30.MTJSqJFaUSD4Z3UrQN1Cg38d3iopWiJtlsT9AMvey30',
   /* Adresse publique du site (GitHub Pages). Sert aux liens des e-mails (confirmation, mot de passe)
      quand l'application est ouverte en local. Laisser vide pour utiliser l'URL du projet Supabase. */
-  siteUrl: '',
+  siteUrl: 'https://gabfrem.github.io/slowik/',
 };
