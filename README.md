@@ -52,7 +52,7 @@ Sans compte, **Réglages → Sauvegarde** permet d'**exporter** la progression e
 
 ## Version en ligne et installation sur téléphone
 
-Le site est publié avec **GitHub Pages**. Sur téléphone, ouvre-le puis « Ajouter à l'écran d'accueil » : Słowik s'installe comme une application (plein écran, fonctionne hors-ligne).
+Le site est publié avec **GitHub Pages** : https://gabfrem.github.io/slowik/ — pour publier des modifications, double-clique sur `Publier sur GitHub.bat`. Sur téléphone, ouvre-le puis « Ajouter à l'écran d'accueil » : Słowik s'installe comme une application (plein écran, fonctionne hors-ligne).
 
 ### Mise en place de la base (une seule fois)
 
