@@ -132,7 +132,7 @@
 .path-start { display: flex; align-items: center; gap: 16px; text-decoration: none; }
 .ps-emoji { font-size: 2.4rem; }
 .path-start p { margin: 4px 0 0; }
-.unit { position: relative; min-width: 0; content-visibility: auto; contain-intrinsic-block-size: auto 900px; }
+.unit { position: relative; min-width: 0; }
 .unit-banner {
   position: relative; display: grid; grid-template-columns: auto 1fr auto; gap: 18px; align-items: center;
   padding: 24px 26px 26px; border-radius: 28px 28px 22px 22px; color: var(--on, #fff); background: var(--c); overflow: visible;
@@ -163,6 +163,7 @@
 .unit-path { position: relative; padding: 46px 0 20px; }
 .up-svg { position: absolute; inset: 0; pointer-events: none; overflow: visible; clip-path: inset(0 0 100% 0); }
 .unit.drawn .up-svg { clip-path: inset(-20px -20px -20px -20px); transition: clip-path 1.8s var(--ease-in-out) .15s; }
+.unit.instant .up-svg, .rv.instant { transition: none; }
 [data-motion="reduced"] .up-svg { clip-path: none; }
 .up-base { fill: none; stroke: color-mix(in srgb, var(--c) 40%, var(--line-2)); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1 13; }
 .up-done { fill: none; stroke: var(--c); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 10 8; }
@@ -175,7 +176,7 @@
 .node-row { position: relative; display: flex; justify-content: center; height: 176px; }
 .node-wrap { position: relative; display: grid; justify-items: center; align-content: start; transform: translateX(calc(var(--x) * min(150px, 22vw))); z-index: 1; }
 .node-wrap.popped { z-index: 6; }
-.unit.popped { content-visibility: visible; z-index: 3; }
+.unit.popped { z-index: 3; }
 .node {
   position: relative; display: grid; place-items: center; width: 94px; height: 94px; border-radius: 50%;
   --node-bg: var(--surface); --node-sh: var(--line-2);
@@ -228,6 +229,8 @@
 .np-words { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
 .np-words .chip { height: 28px; }
 .np-lock { display: flex; gap: 6px; align-items: center; color: var(--ink-3); margin: 0; }
+.np-acts { display: grid; gap: 8px; }
+.np-acts.two { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); }
 .path-end { display: grid; justify-items: center; text-align: center; padding: 30px 0; }
 .path-end .pl { font-size: 1.4rem; margin: 6px 0 0; }
 
@@ -794,3 +797,37 @@
 .ob-voice-pl { font-size: 1.4rem; }
 .ob-voice-status { width: 100%; text-align: left; }
 .ob-explore { margin-top: -4px; }
+
+/* Révisions à la carte : choix des étapes à retravailler */
+.pick-intro { margin: 0 0 4px; }
+.pick-units { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 12px; }
+.pick-uhead { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.pick-unum { display: grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 9px; background: var(--c); color: var(--on, #fff); font-weight: 800; font-size: .8rem; box-shadow: 0 3px 0 var(--c-d); }
+.pick-uname { flex: 1; min-width: 0; font-size: .95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pick-all { flex: none; padding: 5px 12px; border-radius: 99px; font-weight: 800; font-size: .8rem; color: var(--ink-2); background: color-mix(in srgb, var(--c) 14%, transparent); }
+.pick-lessons { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.pick-chip {
+  display: flex; align-items: center; gap: 10px; min-width: 0; padding: 10px 12px; border-radius: 16px; text-align: left;
+  background: var(--surface-2); border: 2px solid var(--line);
+  transition: border-color .2s, background-color .2s, transform .3s var(--ease-spring);
+}
+.pick-chip:active { transform: scale(.97); }
+.pick-chip .emoji { font-size: 1.4rem; flex: none; }
+.pc-txt { display: grid; min-width: 0; line-height: 1.25; }
+.pc-txt b { font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-txt small { font-size: .74rem; font-weight: 700; color: var(--ink-3); }
+.pc-mem { font-style: normal; }
+.pc-mem.lo { color: var(--red); }
+.pc-mem.mid { color: var(--orange); }
+.pc-mem.hi { color: var(--green); }
+.pc-check { display: grid; place-items: center; width: 24px; height: 24px; flex: none; margin-left: auto; border-radius: 50%; border: 2px solid var(--line-2); color: transparent; transition: background-color .2s, border-color .2s, color .2s, transform .35s var(--ease-spring); }
+.pick-chip.on { border-color: var(--c); background: color-mix(in srgb, var(--c) 12%, var(--surface)); }
+.pick-chip.on .pc-check { background: var(--c); border-color: var(--c); color: var(--on, #fff); transform: scale(1.08); }
+.pick-foot { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.pick-count { font-weight: 800; }
+.pick-btns { display: flex; gap: 8px; }
+@media (max-width: 560px) {
+  .pick-foot { flex-direction: column; align-items: stretch; }
+  .pick-count { text-align: center; }
+  .pick-btns > .btn { flex: 1; }
+}

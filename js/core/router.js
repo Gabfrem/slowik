@@ -22,6 +22,21 @@
   let current = null;
   let cleanup = null;
   let first = true;
+  let vt = null;
+
+  /* Un écran recouvre la page (ouverture, séance, accueil) : pas de transition animée, car le navigateur
+     dessine les pages en transition au-dessus de TOUT, ce qui faisait « flasher » la page à travers. */
+  const covered = () =>
+    document.body.classList.contains('in-session') || !!document.querySelector('#splash > *, #overlay > *');
+  /* Termine net une transition en cours (appelé quand une séance ou une fenêtre s'ouvre). */
+  function settle() {
+    if (vt) {
+      try {
+        vt.skipTransition();
+      } catch (e) {}
+      vt = null;
+    }
+  }
 
   function parse() {
     const h = (location.hash || '').replace(/^#\/?/, '');
@@ -74,10 +89,10 @@
     document.title = `${t ? t + ' · ' : ''}Słowik`;
   }
 
-  function render() {
+  function render(opts = {}) {
     const route = parse();
     const view = S.views[route.name];
-    const viewEl = $('#view');
+    let viewEl = $('#view');
     const swap = () => {
       if (cleanup) {
         try {
@@ -88,7 +103,11 @@
       }
       cleanup = null;
       S.audio.stop();
-      viewEl.innerHTML = '';
+      // Conteneur neuf à chaque page : aucun écouteur d'une page précédente ne survit
+      const fresh = viewEl.cloneNode(false);
+      fresh.classList.remove('enter');
+      viewEl.replaceWith(fresh);
+      viewEl = fresh;
       window.scrollTo(0, 0);
       setTitle(view, route.params);
       setActive(route.name);
@@ -103,18 +122,21 @@
       current = route;
       S.bus.emit('route', route);
     };
-    const canVT = document.startViewTransition && !S.fx.reduced() && !first && !document.hidden;
+    const hidden = covered();
+    const canVT = document.startViewTransition && !S.fx.reduced() && !first && !document.hidden && !hidden && !opts.instant;
     first = false;
+    settle();
     if (canVT) {
       try {
-        const vt = document.startViewTransition(swap);
-        [vt.ready, vt.finished, vt.updateCallbackDone].forEach((p) => p && p.catch(() => {}));
+        const t = (vt = document.startViewTransition(swap));
+        [t.ready, t.updateCallbackDone].forEach((p) => p && p.catch(() => {}));
+        t.finished.catch(() => {}).finally(() => vt === t && (vt = null));
       } catch (e) {
         swap();
       }
     } else {
       swap();
-      if (!S.fx.reduced()) {
+      if (!S.fx.reduced() && !hidden) {
         viewEl.classList.remove('enter');
         void viewEl.offsetWidth;
         viewEl.classList.add('enter');
@@ -127,17 +149,20 @@
     if (location.hash === h) render();
     else location.hash = h;
   }
-  const refresh = () => render();
+  const refresh = (opts) => render(opts);
 
   function init() {
     const tb = $('#topbar');
     const onScroll = () => tb && tb.classList.toggle('scrolled', window.scrollY > 8);
     window.addEventListener('scroll', onScroll, { passive: true });
     S.bus.on('route', onScroll);
-    window.addEventListener('hashchange', render);
+    window.addEventListener('hashchange', () => render());
+    // Une séance, une fenêtre ou un panneau s'ouvre : on termine aussitôt la transition de page en cours
+    const mo = new MutationObserver((muts) => muts.some((m) => m.addedNodes.length) && settle());
+    ['#overlay', '#modals'].forEach((sel) => $(sel) && mo.observe($(sel), { childList: true }));
     window.addEventListener('resize', movePill);
     render();
   }
 
-  S.router = { NAV, init, go, refresh, movePill, get current() { return current; } };
+  S.router = { NAV, init, go, refresh, movePill, settle, covered, get current() { return current; } };
 })();

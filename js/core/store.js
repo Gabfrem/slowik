@@ -13,6 +13,7 @@
     settings: {
       theme: 'auto', motion: 'full', sound: true, volume: 0.6, voice: '', rate: 0.9,
       speech: true, autoplay: true, hints: true, stress: true, unlockAll: false,
+      noListenUntil: 0, noSpeakUntil: 0, // « Je ne peux pas écouter / parler maintenant » (pause de 10 min)
     },
     xp: 0,
     days: {},

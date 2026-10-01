@@ -224,7 +224,8 @@
   setInterval(updateAccount, 30000);
   S.bus.on('store:replaced', () => {
     updateHUD();
-    if (!S.session.active && !$('#overlay .onboard')) S.router.refresh();
+    // Sous une séance ou l'écran d'ouverture, la page est redessinée sans animation (invisible)
+    S.router.refresh();
   });
   S.bus.on('cloud:synced', (d) => {
     if (d.changed && d.reason !== 'démarrage') S.ui.toast({ icon: 'cloud', tone: 'ok', title: 'Progression synchronisée', text: 'Ta progression a été mise à jour depuis ton compte.' });
@@ -234,42 +235,30 @@
   function splash(short) {
     return new Promise((resolve) => {
       const el = $('#splash');
+      if (!el || !el.firstElementChild) return resolve();
+      const clear = () => {
+        el.classList.remove('out');
+        el.innerHTML = '';
+        resolve();
+      };
       if (S.fx.reduced()) {
-        el.classList.add('out');
-        return setTimeout(() => {
-          el.innerHTML = '';
-          el.classList.remove('out');
-          resolve();
-        }, 300);
+        el.classList.add('fade');
+        return setTimeout(clear, 300);
       }
-      el.innerHTML = `
-        <div class="splash-inner">
-          <div class="splash-art">
-            ${S.ui.orn.rosette({ petals: 16, colors: ['var(--red)', 'var(--yellow)', 'var(--green)'], cls: 'bloom' })}
-            ${S.ui.orn.rosette({ petals: 10, colors: ['var(--blue)', 'var(--pink)', 'var(--orange)'], cls: 'bloom r2' })}
-            <div class="halo"></div>
-            ${mascot('happy', 200)}
-          </div>
-          <div class="splash-title display">${S.fx.letters('Słowik')}</div>
-          <svg class="splash-stitch" viewBox="0 0 180 12"><path d="M4 6 C 40 -2, 70 14, 90 6 S 150 -2, 176 6" pathLength="100" style="stroke-dasharray:100;stroke-dashoffset:100;animation:draw 1.1s var(--ease-out) 1.2s forwards"/></svg>
-          <div class="splash-tag">Le polonais, mot à mot</div>
-        </div>
-        <div class="splash-skip">Appuyer pour passer</div>`;
+      /* L'animation est déjà dans la page (index.html) et tourne depuis l'ouverture :
+         on ne la recrée pas, on choisit seulement le moment de la sortie. */
+      el.insertAdjacentHTML('beforeend', '<div class="splash-skip">Appuyer pour passer</div>');
       let done = false;
       const finish = () => {
         if (done) return;
         done = true;
         el.classList.add('out');
         S.audio.sfx.whoosh();
-        setTimeout(() => {
-          el.classList.remove('out');
-          el.innerHTML = '';
-          resolve();
-        }, 1000);
+        setTimeout(clear, 1000);
       };
       el.addEventListener('click', finish, { once: true });
       window.addEventListener('keydown', finish, { once: true });
-      setTimeout(finish, short ? 1900 : 2600);
+      setTimeout(finish, Math.max(500, (short ? 1900 : 2600) - performance.now()));
     });
   }
 

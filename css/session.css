@@ -250,3 +250,13 @@ body.in-session { overflow: hidden; }
 .res-word .pl { font-size: 1rem; }
 .res-callout { width: 100%; text-align: left; animation: rise .6s var(--ease-out) 1.8s both; }
 .res-actions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px; animation: rise .6s var(--ease-out) 1.2s both; }
+
+/* « Je ne peux pas écouter / parler maintenant » */
+.ss-cant-row { display: flex; justify-content: center; margin-top: 18px; }
+.ss-cant {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border-radius: 99px;
+  font-size: .86rem; font-weight: 800; color: var(--ink-3); border: 1px dashed var(--line-2);
+  transition: color .2s, background-color .2s, border-color .2s;
+}
+.ss-cant:hover { color: var(--ink); background: var(--surface-2); border-style: solid; }
+.ss-cant .ic { opacity: .8; }

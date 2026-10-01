@@ -6,8 +6,20 @@
   const C = S.content;
   const E = S.ex;
 
-  const canHear = () => S.audio.hasVoice();
-  const canSpeak = () => S.store.state.settings.speech && S.audio.canListen();
+  /* « Je ne peux pas écouter / parler maintenant » : ces exercices sont mis en pause 10 minutes. */
+  const PAUSE_MS = 10 * 60 * 1000;
+  const NEEDS = { listen: 'listen', dictation: 'listen', speak: 'speak' };
+  const PAUSE_KEY = { listen: 'noListenUntil', speak: 'noSpeakUntil' };
+  const paused = (need) => Date.now() < (S.store.state.settings[PAUSE_KEY[need]] || 0);
+  const canHear = () => S.audio.hasVoice() && !paused('listen');
+  const canSpeak = () => S.store.state.settings.speech && S.audio.canListen() && !paused('speak');
+  /* Variante sans son ni micro d'un exercice (null = on le retire). */
+  function noAudioAlt(it) {
+    const [k, args] = it._spec || [];
+    if (k === 'listen') return E.choice(args[0], 'pl-fr', args[1]);
+    if (k === 'dictation') return E.build(args[0], 'fr-pl', args[0].unit);
+    return null;
+  }
 
   /* ───────────── Générateurs ───────────── */
   function poolFor(unit) {
@@ -86,22 +98,32 @@
     return spread(items);
   }
 
-  /* Entraînement ciblé : mots appris les plus fragiles. */
-  function practiceItems(n = 12) {
-    const learned = C.learnedWords();
+  /* Entraînement ciblé : mots appris les plus fragiles (de tout le parcours, ou d'une sélection). */
+  function practiceItems(n = 12, subset) {
     const cards = S.store.state.cards;
+    const learned = subset ? subset.filter((w) => w && cards[w.id]) : C.learnedWords();
     const weak = learned
       .map((w) => ({ w, r: S.srs.recallNow(cards[w.id]) - (cards[w.id].lapses || 0) * 0.05 + Math.random() * 0.15 }))
       .sort((a, b) => a.r - b.r)
       .map((x) => x.w);
     const pickW = weak.slice(0, 10);
-    if (pickW.length < 4) return null;
+    if (pickW.length < (subset ? 2 : 4)) return null;
     const units = uniq(pickW.map((w) => w.unit));
     const pool = [].concat(...units.map((u) => u.words));
+    const items = [];
+    if (pickW.length >= 3) items.push(E.match(sample(pickW, 5)));
+    if (subset) {
+      // Sélection : chaque mot revient deux fois (production + reconnaissance), phrases des mêmes étapes
+      pickW.forEach((w, i) => {
+        items.push(i % 2 ? E.type(w) : listenOr(w, pool));
+        items.push(E.choice(w, i % 2 ? 'pl-fr' : 'fr-pl', pool));
+      });
+      const sents = uniq(pickW.map((w) => w.lesson)).flatMap((l) => l.sentences);
+      sample(sents, 3).forEach((s, i) => items.push(E.build(s, i % 2 ? 'pl-fr' : 'fr-pl', s.unit)));
+      return spread(items).slice(0, n);
+    }
     const sents = [].concat(...units.map((u) => u.lessons.filter((l) => C.isDone(l.id)).flatMap((l) => l.sentences)));
     const clz = [].concat(...units.map((u) => u.cloze || []));
-    const items = [];
-    items.push(E.match(sample(pickW, 5)));
     pickW.slice(0, 4).forEach((w, i) => items.push(i % 2 ? E.type(w) : listenOr(w, pool)));
     pickW.slice(4, 7).forEach((w) => items.push(E.choice(w, pick(['pl-fr', 'fr-pl']), pool)));
     sample(sents, 2).forEach((s, i) => items.push(E.build(s, i ? 'pl-fr' : 'fr-pl', s.unit)));
@@ -166,6 +188,8 @@
       phase: 'answer',
     };
     opts.items.forEach((it) => it.graded && st.graded++);
+    // Une séance entièrement d'écoute (dictée choisie exprès) ne propose pas la pause
+    const audioOnly = opts.items.every((it) => NEEDS[it.type]);
     const stage = root.querySelector('.ss-stage');
     const checkBtn = root.querySelector('.ss-check');
     const skipBtn = root.querySelector('.ss-skip');
@@ -203,6 +227,14 @@
         stage.innerHTML = '<div class="ss-card"></div>';
         const card = stage.firstElementChild;
         item.mount(card, api);
+        const need = NEEDS[item.type];
+        if (need && !audioOnly) {
+          card.insertAdjacentHTML(
+            'beforeend',
+            `<div class="ss-cant-row"><button type="button" class="ss-cant">${icon(need === 'speak' ? 'mic' : 'speaker', 16)}<span>${need === 'speak' ? 'Je ne peux pas parler maintenant' : 'Je ne peux pas écouter maintenant'}</span></button></div>`
+          );
+          card.querySelector('.ss-cant').addEventListener('click', () => cant(need));
+        }
         card.classList.add('enter');
         S.ui.animateRings(card);
       };
@@ -210,6 +242,46 @@
         old.classList.add('leave');
         setTimeout(mountNew, 230);
       } else mountNew();
+    }
+
+    /* Pause de 10 minutes pour les exercices d'écoute ou de micro : l'exercice en cours et ceux
+       qui restent sont remplacés par une variante écrite (ou retirés pour la prononciation). */
+    function cant(need) {
+      S.store.state.settings[PAUSE_KEY[need]] = Date.now() + PAUSE_MS;
+      S.store.save();
+      S.audio.stop();
+      if (need === 'speak') S.audio.stopListening();
+      S.ui.toast({
+        icon: need === 'speak' ? 'mic' : 'speaker',
+        title: need === 'speak' ? 'Micro en pause' : 'Écoute en pause',
+        text: `Plus d’exercices ${need === 'speak' ? 'de prononciation' : 'd’écoute'} pendant 10 minutes.`,
+      });
+      const swap = (it) => {
+        const alt = noAudioAlt(it);
+        if (alt) {
+          alt.orig = it.orig;
+          alt.tries = it.tries;
+          if (it.graded && !alt.graded) st.graded--;
+          if (!it.graded && alt.graded) st.graded++;
+        } else {
+          // Exercice retiré : il ne compte plus ni dans la progression ni dans la précision
+          st.total = Math.max(1, st.total - 1);
+          if (it.graded && it.tries === 0) st.graded = Math.max(0, st.graded - 1);
+        }
+        return alt;
+      };
+      st.queue = st.queue.map((it) => (NEEDS[it.type] === need ? swap(it) : it)).filter(Boolean);
+      const item = st.cur;
+      if (st.phase !== 'answer' || !item || NEEDS[item.type] !== need) {
+        const row = stage.querySelector('.ss-cant-row');
+        if (row) row.remove();
+        return setProgress();
+      }
+      if (item._skip) item._skip();
+      const alt = swap(item);
+      setProgress();
+      if (alt) show(alt);
+      else next();
     }
 
     function next() {
@@ -489,16 +561,17 @@
     });
   }
 
-  function startPractice(from) {
-    const items = practiceItems();
+  /* subset : liste de mots à travailler (révision « à la carte »), label : son nom affiché. */
+  function startPractice(from, subset, label) {
+    const items = practiceItems(subset ? 18 : 12, subset);
     if (!items) {
-      S.ui.toast({ emoji: '🌱', title: 'Pas encore assez de mots', text: 'Termine au moins une leçon pour débloquer l’entraînement ciblé.' });
+      S.ui.toast({ emoji: '🌱', title: 'Pas encore assez de mots', text: subset ? 'Choisis des étapes contenant au moins 2 mots appris.' : 'Termine au moins une leçon pour débloquer l’entraînement ciblé.' });
       return;
     }
     open({
-      items, from, color: 'green',
-      titleHTML: '<span class="pl">Trening</span><span class="muted"> · Entraînement ciblé</span>',
-      doneLabel: 'Entraînement ciblé',
+      items, from, color: subset ? 'blue' : 'green',
+      titleHTML: `<span class="pl">Trening</span><span class="muted"> · ${esc(label || 'Entraînement ciblé')}</span>`,
+      doneLabel: label || 'Entraînement ciblé',
       onFinish(r) {
         r.xp = Math.max(5, Math.round(r.acc * 12));
         S.store.addXP(r.xp, 'practice');
@@ -508,7 +581,7 @@
         S.store.checkAchievements();
         return {};
       },
-      again: () => startPractice(),
+      again: () => startPractice(null, subset, label),
     });
   }
 

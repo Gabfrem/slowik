@@ -34,6 +34,121 @@
     return out;
   }
 
+  /* Étapes du parcours qui ont des mots appris, regroupées par unité. */
+  function pickGroups() {
+    const cards = S.store.state.cards;
+    return C.units
+      .map((u) => ({
+        u,
+        lessons: u.lessons
+          .map((l) => {
+            const ids = l.words.filter((w) => cards[w.id]).map((w) => w.id);
+            const mem = ids.length ? ids.reduce((t, id) => t + S.srs.recallNow(cards[id]), 0) / ids.length : 0;
+            return { l, ids, mem: Math.round(mem * 100) };
+          })
+          .filter((x) => x.ids.length),
+      }))
+      .filter((g) => g.lessons.length);
+  }
+  let picked = new Set(); // sélection gardée le temps de la visite
+
+  function pickHTML(groups) {
+    return `
+      <div class="card mt rv pick-card" style="--i:1">
+        <div class="card-title">${icon('target', 20)}<h3>Réviser à la carte</h3><span class="eyebrow">Par étape</span></div>
+        <p class="small muted pick-intro">Choisis les étapes du parcours à retravailler, par exemple celles que tu maîtrises le moins. Le pourcentage estime ta mémoire actuelle de leurs mots.</p>
+        <div class="pick-units">
+          ${groups
+            .map(
+              (g) => `
+            <div class="pick-unit" data-unit="${g.u.id}" style="${cvars(g.u.color)}">
+              <div class="pick-uhead">
+                <span class="pick-unum">${g.u.num}</span>
+                <b class="pick-uname">${esc(g.u.fr)}</b>
+                <button type="button" class="pick-all" data-unit="${g.u.id}">Tout</button>
+              </div>
+              <div class="pick-lessons">
+                ${g.lessons
+                  .map(
+                    (x) => `
+                  <button type="button" class="pick-chip" data-lesson="${x.l.id}" aria-pressed="false">
+                    <span class="emoji">${x.l.icon}</span>
+                    <span class="pc-txt"><b>${esc(x.l.fr)}</b><small>${x.ids.length} mot${x.ids.length > 1 ? 's' : ''} · <i class="pc-mem ${x.mem < 70 ? 'lo' : x.mem < 88 ? 'mid' : 'hi'}">${x.mem} %</i></small></span>
+                    <span class="pc-check">${icon('check', 14)}</span>
+                  </button>`
+                  )
+                  .join('')}
+              </div>
+            </div>`
+            )
+            .join('')}
+        </div>
+        <div class="pick-foot">
+          <span class="pick-count small muted">Aucune étape choisie</span>
+          <div class="pick-btns">
+            <button type="button" class="btn btn-soft" data-pick="ex" disabled>${icon('gym', 18)}<span>Exercices</span></button>
+            <button type="button" class="btn btn-blue" data-pick="cards" disabled>${icon('cards', 18)}<span>Cartes</span></button>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  function wirePick(card) {
+    const cards = S.store.state.cards;
+    const chips = Array.from(card.querySelectorAll('.pick-chip'));
+    const valid = new Set(chips.map((c) => c.dataset.lesson));
+    picked = new Set([...picked].filter((id) => valid.has(id)));
+    const countEl = card.querySelector('.pick-count');
+    const bCards = card.querySelector('[data-pick="cards"]');
+    const bEx = card.querySelector('[data-pick="ex"]');
+    const ids = () => [...picked].flatMap((id) => C.nodeById[id].words.filter((w) => cards[w.id]).map((w) => w.id));
+    const update = () => {
+      chips.forEach((c) => {
+        const on = picked.has(c.dataset.lesson);
+        c.classList.toggle('on', on);
+        c.setAttribute('aria-pressed', on);
+      });
+      card.querySelectorAll('.pick-all').forEach((b) => {
+        const ls = Array.from(card.querySelectorAll(`.pick-unit[data-unit="${b.dataset.unit}"] .pick-chip`)).map((c) => c.dataset.lesson);
+        b.textContent = ls.every((l) => picked.has(l)) ? 'Aucune' : 'Tout';
+      });
+      const n = ids().length;
+      countEl.textContent = picked.size ? `${picked.size} étape${picked.size > 1 ? 's' : ''} · ${n} mot${n > 1 ? 's' : ''}` : 'Aucune étape choisie';
+      countEl.classList.toggle('muted', !picked.size);
+      bCards.disabled = !n;
+      bEx.disabled = n < 2;
+    };
+    chips.forEach((c) =>
+      c.addEventListener('click', () => {
+        const id = c.dataset.lesson;
+        if (picked.has(id)) picked.delete(id);
+        else picked.add(id);
+        S.audio.sfx.select();
+        S.fx.pop(c, 1.04);
+        update();
+      })
+    );
+    card.querySelectorAll('.pick-all').forEach((b) =>
+      b.addEventListener('click', () => {
+        const ls = Array.from(card.querySelectorAll(`.pick-unit[data-unit="${b.dataset.unit}"] .pick-chip`)).map((c) => c.dataset.lesson);
+        const all = ls.every((l) => picked.has(l));
+        ls.forEach((l) => (all ? picked.delete(l) : picked.add(l)));
+        S.audio.sfx.select();
+        update();
+      })
+    );
+    const label = () => (picked.size === 1 ? C.nodeById[[...picked][0]].fr : `${picked.size} étapes choisies`);
+    bCards.addEventListener('click', () => startReview(weakFirst(ids()).slice(0, 40), bCards));
+    bEx.addEventListener('click', () => S.session.startPractice(bEx, ids().map((id) => C.wordById[id]), label()));
+    update();
+  }
+
+  /* Les mots les plus fragiles d'abord. */
+  function weakFirst(ids) {
+    const cards = S.store.state.cards;
+    return ids.slice().sort((a, b) => S.srs.recallNow(cards[a]) - S.srs.recallNow(cards[b]));
+  }
+
   S.views.review = {
     title: 'Révisions',
     pl: 'Powtórki',
@@ -44,6 +159,7 @@
       const fc = forecast();
       const maxF = Math.max(1, ...fc);
       const DAYN = ['Auj.', 'Dem.', '+2 j', '+3 j', '+4 j', '+5 j', '+6 j'];
+      const groups = pickGroups();
       el.innerHTML = `
         <section class="review">
           <div class="rv-hero card paper rv" style="--layer:var(--blue)">
@@ -62,6 +178,8 @@
               ${!due.length && total ? `<div class="deck-bird">${mascot('sleep', 110)}</div>` : ''}
             </div>
           </div>
+
+          ${groups.length ? pickHTML(groups) : ''}
 
           <div class="grid g2 mt">
             <div class="card rv" style="--i:1">
@@ -90,7 +208,7 @@
             <div class="grade-help">
               ${GRADES.map((g) => `<div class="gh ${g.cls}"><span class="kbd">${g.key}</span><b>${g.fr}</b><span class="pl">${g.pl}</span><small>${['Je ne savais pas.', 'Trouvé, mais avec effort.', 'Trouvé sans trop hésiter.', 'Évident, immédiat !'][g.g - 1]}</small></div>`).join('')}
             </div>
-            <p class="small muted mt">Astuce : après avoir retourné une carte, glisse-la vers la droite (Bien) ou la gauche (À revoir). Espace pour retourner.</p>
+            <p class="small muted mt">Astuce : après avoir retourné une carte, glisse-la vers la droite (Bien) ou la gauche (À revoir).<span class="on-key"> Espace pour retourner.</span></p>
           </div>
         </section>`;
       el.querySelectorAll('[data-rv]').forEach((b) =>
@@ -100,6 +218,8 @@
         })
       );
       el.querySelectorAll('.fc-bar').forEach((b, i) => setTimeout(() => b.classList.add('grow'), 300 + i * 70));
+      const pc = el.querySelector('.pick-card');
+      if (pc) wirePick(pc);
     },
   };
 
@@ -174,7 +294,7 @@
           </div>
           ${w.ex ? `<div class="fc-ex"><div class="pl">${S.ui.glossy(w.ex[0])}</div><div class="small muted">${frTypo(esc(w.ex[1]))}</div></div>` : ''}`;
       return `<div class="fc-card" style="${cvars(w.unit.color)}"><div class="fc-inner">
-          <div class="fc-face fc-front">${front}<div class="fc-flip-hint">${icon('refresh', 16)} Espace pour retourner</div></div>
+          <div class="fc-face fc-front">${front}<div class="fc-flip-hint">${icon('refresh', 16)} <span class="on-key">Espace pour retourner</span><span class="on-touch">Touche la carte pour la retourner</span></div></div>
           <div class="fc-face fc-back">${back}</div>
         </div><div class="fc-stamp"></div></div>`;
     }
@@ -343,5 +463,5 @@
     setTimeout(show, 420);
   }
 
-  S.review = { start: startReview };
+  S.review = { start: startReview, weakFirst };
 })();

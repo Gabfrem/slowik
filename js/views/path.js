@@ -109,6 +109,8 @@
     const info = S.store.lessonInfo(node.id);
     const u = node.unit;
     const words = isCh ? [] : node.words;
+    // Mots déjà appris de cette étape (ou de toute l'unité pour le défi) : révisables en cartes
+    const revIds = stt === 'locked' ? [] : (isCh ? u.words : node.words).filter((w) => S.store.state.cards[w.id]).map((w) => w.id);
     const pop = document.createElement('div');
     pop.className = `node-pop ${stt}`;
     pop.style.cssText = cvars(u.color);
@@ -119,7 +121,10 @@
         ${info ? `<span class="chip">${icon('star', 14)} ${info.stars}/3</span>` : ''}
       </div>
       ${words.length ? `<div class="np-words">${words.map((w) => `<span class="chip"><span class="emoji">${w.e}</span><span class="pl">${esc(w.pl)}</span></span>`).join('')}</div>` : `<p class="small">${isCh ? 'Mélange de tout le vocabulaire et des phrases de l’unité. Réussis-le pour débloquer la suite !' : ''}</p>`}
-      ${stt === 'locked' ? `<p class="small np-lock">${icon('lock', 16)} Termine l’étape précédente pour débloquer celle-ci.</p>` : `<button type="button" class="btn btn-block np-go" style="${cvars(u.color)};--fg:#fff">${icon('play', 18)}<span>${stt === 'done' ? 'Rejouer (+XP)' : isCh ? 'Relever le défi' : 'Commencer'}</span></button>`}`;
+      ${stt === 'locked' ? `<p class="small np-lock">${icon('lock', 16)} Termine l’étape précédente pour débloquer celle-ci.</p>` : `<div class="np-acts ${revIds.length ? 'two' : ''}">
+        <button type="button" class="btn btn-block np-go" style="${cvars(u.color)};--fg:#fff">${icon('play', 18)}<span>${stt === 'done' ? 'Rejouer' : isCh ? 'Relever le défi' : 'Commencer'}</span></button>
+        ${revIds.length ? `<button type="button" class="btn btn-block btn-soft np-rev">${icon('cards', 18)}<span>Réviser</span></button>` : ''}
+      </div>`}`;
     const wrap = btn.closest('.node-wrap');
     wrap.appendChild(pop);
     wrap.classList.add('popped');
@@ -144,6 +149,12 @@
       e.stopPropagation();
       closePop(root);
       S.session.startNode(node, btn);
+    });
+    const rev = pop.querySelector('.np-rev');
+    if (rev) rev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closePop(root);
+      S.review.start(S.review.weakFirst(revIds), btn);
     });
     pop.addEventListener('click', (e) => e.stopPropagation());
   }
@@ -197,21 +208,25 @@
       const redraw = () => drawLines(el);
       window.addEventListener('resize', redraw);
 
-      // Chaque unité trace son chemin (puis le révèle) quand elle apparaît à l'écran
-      const io = new IntersectionObserver(
-        (entries) =>
-          entries.forEach((en) => {
-            if (en.isIntersecting) {
-              const u = en.target;
-              drawUnit(u);
-              requestAnimationFrame(() => u.classList.add('drawn'));
-              setTimeout(() => drawUnit(u), 900);
-              io.unobserve(u);
-            }
-          }),
-        { threshold: 0.05 }
-      );
-      el.querySelectorAll('.unit').forEach((u) => io.observe(u));
+      /* Tout le parcours est prêt d'emblée : seules les unités visibles à l'ouverture s'animent.
+         (Sur téléphone, un défilement rapide n'attend plus l'apparition des nœuds ni des chemins.) */
+      requestAnimationFrame(() => {
+        if (!el.isConnected) return;
+        const vh = innerHeight;
+        const onScreen = (x) => {
+          const r = x.getBoundingClientRect();
+          return r.bottom > -40 && r.top < vh + 40;
+        };
+        el.querySelectorAll('.unit').forEach((u) => {
+          drawUnit(u);
+          if (onScreen(u)) requestAnimationFrame(() => u.classList.add('drawn'));
+          else u.classList.add('drawn', 'instant');
+        });
+        el.querySelectorAll('.rv:not(.in)').forEach((x) => !onScreen(x) && x.classList.add('in', 'instant'));
+      });
+      // Les polices chargées peuvent décaler les nœuds : on retrace une fois prêtes
+      const relayout = setTimeout(redraw, 900);
+      document.fonts && document.fonts.ready.then(() => el.isConnected && redraw());
 
       el.addEventListener('click', (e) => {
         const b = e.target.closest('.node');
@@ -229,14 +244,20 @@
       const onDoc = () => closePop(el);
       document.addEventListener('click', onDoc);
 
-      // Défilement jusqu'à l'étape en cours
+      // Défilement jusqu'à l'étape en cours… sauf si on a déjà commencé à faire défiler soi-même
       const cur = el.querySelector('.node-wrap.current');
-      if (cur && anyDone) setTimeout(() => cur.scrollIntoView({ behavior: S.fx.reduced() ? 'auto' : 'smooth', block: 'center' }), 500);
+      let touched = false;
+      const onTouch = () => (touched = true);
+      const TOUCH = ['touchstart', 'wheel', 'keydown'];
+      TOUCH.forEach((t) => window.addEventListener(t, onTouch, { passive: true, once: true }));
+      const autoScroll = cur && anyDone ? setTimeout(() => !touched && cur.scrollIntoView({ behavior: S.fx.reduced() ? 'auto' : 'smooth', block: 'center' }), 350) : 0;
 
       return () => {
+        clearTimeout(autoScroll);
+        clearTimeout(relayout);
+        TOUCH.forEach((t) => window.removeEventListener(t, onTouch));
         window.removeEventListener('resize', redraw);
         document.removeEventListener('click', onDoc);
-        io.disconnect();
       };
     },
   };

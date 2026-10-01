@@ -14,13 +14,14 @@ Tu peux aussi ouvrir directement `index.html` dans Edge ou Chrome (la progressio
 > - **Chrome** : voix « Google polski ».
 >
 > Sans voix polonaise, tout fonctionne, sauf les exercices d'écoute (ils sont alors remplacés automatiquement).
+> Pas de son ou pas de micro sous la main ? Les boutons « Je ne peux pas écouter / parler maintenant » remplacent ces exercices pendant 10 minutes.
 
 ## Ce qu'il y a dedans
 
 | Section | Contenu |
 |---|---|
 | **Parcours** | 15 unités (A1 → A2), 45 leçons et 15 défis, 272 mots, 198 phrases |
-| **Révisions** | Cartes recto-verso et répétition espacée **FSRS** (l'algorithme d'Anki moderne) |
+| **Révisions** | Cartes recto-verso et répétition espacée **FSRS** (l'algorithme d'Anki moderne) ; révision « à la carte » des étapes de son choix (cartes ou exercices) |
 | **Sons** | Alphabet interactif, tableau des chuintantes (s/sz/ś…), paires minimales, accent tonique, virelangues |
 | **Grammaire** | 17 fiches illustrées : genres, 7 cas, conjugaisons, passé, aspect, futur, nombres… avec quiz |
 | **Dialogues** | 10 dialogues et 2 histoires, traduction au survol de chaque mot, lecture audio, quiz |
